@@ -1,0 +1,7 @@
+OBJECTS = Q.o RcppExports.o backend_api.o cuda_adapter.o
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+
+all: $(SHLIB)
+
+clean:
+	rm -f $(OBJECTS) $(SHLIB)

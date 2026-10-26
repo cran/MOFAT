@@ -1,0 +1,6 @@
+#!/bin/sh
+
+rm -f src/Makevars src/Makevars.win \
+  src/*.o src/*.so src/*.dll src/*.dylib src/*.obj src/*.exp src/*.lib \
+  src/cuda_build_config.h src/soft_metal.mm src/*.o.tmp config.log
+exit 0

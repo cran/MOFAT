@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+cuda_reason="CUDA acceleration is supported only on Linux; Windows uses CPU."
+echo "configure.win: installing the CPU-only Windows backend"
+rm -f src/cuda_build_config.h src/soft_metal.mm
+
+printf '%s\n' \
+  '#ifndef MOFAT_CUDA_BUILD_CONFIG_H' \
+  '#define MOFAT_CUDA_BUILD_CONFIG_H' \
+  "#define MOFAT_CUDA_BUILD_REASON \"$cuda_reason\"" \
+  '#endif' > src/cuda_build_config.h
+
+cp src/Makevars.win.in src/Makevars.win
+exit 0

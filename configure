@@ -1,0 +1,94 @@
+#!/bin/sh
+
+set -e
+
+platform=$(uname -s 2>/dev/null || echo unknown)
+gpu_objects=""
+gpu_cppflags=""
+gpu_libs=""
+loader_libs=""
+cuda_helper="src/mofat_cuda_helper.so"
+cuda_reason=""
+
+: > config.log
+rm -f "$cuda_helper" src/cuda_build_config.h src/soft_metal.mm
+
+if test "$platform" = "Darwin"; then
+  if test "$MOFAT_DISABLE_GPU" != "1" &&
+     test -f src/metal/soft_metal.mm &&
+     test -d /System/Library/Frameworks/Metal.framework &&
+     test -d /System/Library/Frameworks/MetalPerformanceShaders.framework; then
+    cp src/metal/soft_metal.mm src/soft_metal.mm
+    gpu_objects="soft_metal.o"
+    gpu_cppflags="-DMOFAT_HAS_METAL"
+    gpu_libs="-framework CoreGraphics -framework Foundation -framework Metal -framework MetalPerformanceShaders"
+    echo "configure: Metal backend enabled"
+  else
+    echo "configure: Metal backend disabled; CPU remains available"
+  fi
+  cuda_reason="CUDA is not supported on macOS; use Metal or CPU."
+elif test "$platform" = "Linux"; then
+  loader_libs="-ldl"
+  if test "$MOFAT_DISABLE_GPU" != "1"; then
+    nvcc_path=""
+    if test -n "$CUDA_HOME" && test -x "$CUDA_HOME/bin/nvcc"; then
+      nvcc_path="$CUDA_HOME/bin/nvcc"
+    elif test -n "$CUDA_PATH" && test -x "$CUDA_PATH/bin/nvcc"; then
+      nvcc_path="$CUDA_PATH/bin/nvcc"
+    elif command -v nvcc >/dev/null 2>&1; then
+      nvcc_path=$(command -v nvcc)
+    fi
+
+    if test -n "$nvcc_path"; then
+      cuda_arch=${MOFAT_CUDA_ARCH:-native}
+      echo "configure: attempting CUDA helper with $nvcc_path (-arch=$cuda_arch)"
+      echo "CUDA compiler: $nvcc_path" >> config.log
+      "$nvcc_path" --version >> config.log 2>&1 || true
+      if test -n "$NVCC_CCBIN"; then
+        if "$nvcc_path" -std=c++17 -O3 -arch="$cuda_arch" -ccbin "$NVCC_CCBIN" \
+             -shared -Xcompiler=-fPIC src/soft_cuda.cu -o "$cuda_helper" \
+             -lcublas -lcusolver >> config.log 2>&1; then
+          echo "configure: CUDA helper built successfully"
+        else
+          rm -f "$cuda_helper"
+          cuda_reason="NVCC could not build the CUDA helper; inspect the installation log and verify the CUDA host compiler."
+          echo "configure: CUDA helper build failed; CPU fallback remains available"
+          echo "configure: see config.log for the NVCC diagnostic"
+        fi
+      elif "$nvcc_path" -std=c++17 -O3 -arch="$cuda_arch" \
+             -shared -Xcompiler=-fPIC src/soft_cuda.cu -o "$cuda_helper" \
+             -lcublas -lcusolver >> config.log 2>&1; then
+        echo "configure: CUDA helper built successfully"
+      else
+        rm -f "$cuda_helper"
+        cuda_reason="NVCC could not build the CUDA helper; inspect the installation log and verify the CUDA host compiler."
+        echo "configure: CUDA helper build failed; CPU fallback remains available"
+        echo "configure: see config.log for the NVCC diagnostic"
+      fi
+    else
+      cuda_reason="NVCC was not found through CUDA_HOME, CUDA_PATH, or PATH."
+      echo "configure: NVCC not found; installing CPU-only backend"
+    fi
+  else
+    cuda_reason="GPU backends were disabled by MOFAT_DISABLE_GPU=1."
+    echo "configure: GPU backends disabled by MOFAT_DISABLE_GPU=1"
+  fi
+else
+  cuda_reason="CUDA is not supported on this operating system."
+  echo "configure: unsupported GPU platform '$platform'; installing CPU-only backend"
+fi
+
+printf '%s\n' \
+  '#ifndef MOFAT_CUDA_BUILD_CONFIG_H' \
+  '#define MOFAT_CUDA_BUILD_CONFIG_H' \
+  "#define MOFAT_CUDA_BUILD_REASON \"$cuda_reason\"" \
+  '#endif' > src/cuda_build_config.h
+
+sed \
+  -e "s|@GPU_OBJECTS@|$gpu_objects|g" \
+  -e "s|@GPU_CPPFLAGS@|$gpu_cppflags|g" \
+  -e "s|@GPU_LIBS@|$gpu_libs|g" \
+  -e "s|@LOADER_LIBS@|$loader_libs|g" \
+  src/Makevars.in > src/Makevars
+
+exit 0

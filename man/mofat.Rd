@@ -4,7 +4,7 @@
 \alias{mofat}
 \title{MOFAT}
 \usage{
-mofat(p, l, method = "best")
+mofat(p, l, method = "best", nstart = 1, init = "MaxPro")
 }
 \arguments{
 \item{p}{number of factors}
@@ -12,6 +12,11 @@ mofat(p, l, method = "best")
 \item{l}{number of base runs}
 
 \item{method}{choose among "uniform", "projection", and "best"}
+
+\item{nstart}{number of random starts used when \code{l > 3}}
+
+\item{init}{initialization method for the base matrix when \code{l > 3};
+choose among \code{"rLHD"}, \code{"MaxPro"}, and \code{"MmLHD"}}
 }
 \value{
 \item{design}{MOFAT design}
@@ -49,7 +54,7 @@ Sobol’, I. M. (1993), “On sensitivity estimation for nonlinear mathematical 
 Modeling and Computational Experiments, 1, 407–414.
 
 Xiao, Q., Joseph, V. R., and Ray, D. M. (2022). “Maximum One-Factor-At-A-Time  Designs for Screening in Computer Experiments”.
-Technometrics, to appear.
+Technometrics, 65, 261--270.
 }
 \author{
 Qian Xiao and V. Roshan Joseph

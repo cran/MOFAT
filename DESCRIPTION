@@ -1,24 +1,41 @@
 Package: MOFAT
 Title: Maximum One-Factor-at-a-Time Designs
-Version: 1.0
+Version: 2.0
 Authors@R: c(
+    person(given = "Difan",
+           family = "Song",
+           role = c("aut", "cre"),
+           email = "dfsong96@gmail.com"),
+    person(given = "Wei-Yang",
+           family = "Yu",
+           role = c("aut"),
+           email = "wyu322@gatech.edu"),
     person(given = "Qian",
            family = "Xiao",
            role = c("aut"),
-           email = "QIAN.XIAO@uga.edu"),
+           email = "qian.xiao@sjtu.edu.cn"),
     person(given = "V. Roshan",
            family = "Joseph",
-           role = c("aut", "cre"),
-           email = "roshan@gatech.edu"))
-Imports: SLHD, stats
-Description: Identifying important factors from a large number of potentially important factors of a highly nonlinear and computationally expensive black box model is a difficult problem. Xiao, Joseph, and Ray (2022) <doi:10.1080/00401706.2022.2141897> proposed Maximum One-Factor-at-a-Time (MOFAT) designs for doing this. A MOFAT design can be viewed as an improvement to the random one-factor-at-a-time (OFAT) design proposed by Morris (1991) <doi:10.1080/00401706.1991.10484804>. The improvement is achieved by exploiting the connection between Morris screening designs and Monte Carlo-based Sobol' designs, and optimizing the design using a space-filling criterion. This work is supported by a U.S. National Science Foundation (NSF) grant CMMI-1921646 <https://www.nsf.gov/awardsearch/showAward?AWD_ID=1921646>.
+           role = c("aut"),
+           email = "roshan@gatech.edu")
+    )
+Imports: gtools, Rcpp, SFDesign, scales, SLHD, spacefillr, stats,
+        MaxPro, RcppHungarian, withr
+LinkingTo: Rcpp, RcppArmadillo
+Suggests: testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Description: Identifying important factors from a large number of potentially important factors in a highly nonlinear and computationally expensive black-box model is a difficult problem. Xiao, Joseph, and Ray (2022) <doi:10.1080/00401706.2022.2141897> proposed Maximum One-Factor-at-a-Time (MOFAT) designs for this purpose. A MOFAT design is a collection of one-factor-at-a-time (OFAT) designs constructed to achieve maximal screening capability. Song and Joseph (2026) <doi:10.48550/arXiv.2609.02087> extended the MOFAT framework to incorporate nominal and discrete numeric factors. The resulting designs are implemented in the mofatQQ function. Yu and Joseph (2026) <doi:10.48550/arXiv.2606.02533> proposed Space-Filling One-Factor-at-a-Time (SOFT) designs, which achieve optimal space-filling properties while retaining the screening capability. Therefore, SOFT designs are useful for both factor screening and surrogate modeling. The work on MOFAT is supported by a U.S. National Science Foundation (NSF) grant CMMI-1921646 <https://www.nsf.gov/awardsearch/show-award/?AWD_ID=1921646>, and the work on MOFATQQ and SOFT is supported by a U.S. NSF grant DMS-2310637.
 License: GPL (>= 2)
 Encoding: UTF-8
-RoxygenNote: 7.2.1
-NeedsCompilation: no
-Packaged: 2022-10-27 21:16:53 UTC; rv48
-Author: Qian Xiao [aut],
-  V. Roshan Joseph [aut, cre]
-Maintainer: V. Roshan Joseph <roshan@gatech.edu>
+NeedsCompilation: yes
+SystemRequirements: On Linux, optional NVIDIA CUDA Toolkit (12.x or
+        13.x) and a supported host compiler; Metal is optional on macOS
+Config/roxygen2/version: 8.1.1
+Packaged: 2026-10-25 21:27:32 UTC; weiyang
+Author: Difan Song [aut, cre],
+  Wei-Yang Yu [aut],
+  Qian Xiao [aut],
+  V. Roshan Joseph [aut]
+Maintainer: Difan Song <dfsong96@gmail.com>
 Repository: CRAN
-Date/Publication: 2022-10-29 08:52:56 UTC
+Date/Publication: 2026-10-26 13:10:20 UTC

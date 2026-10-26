@@ -1,0 +1,8 @@
+OBJECTS = Q.o RcppExports.o backend_api.o cuda_adapter.o @GPU_OBJECTS@
+PKG_CPPFLAGS = @GPU_CPPFLAGS@
+PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) @GPU_LIBS@ @LOADER_LIBS@
+
+all: $(SHLIB)
+
+clean:
+	rm -f $(OBJECTS) $(SHLIB)
